@@ -3,3 +3,6 @@
 /train-images-idx3-ubyte
 /train-labels-idx1-ubyte
 project2.code-workspace
+autoencoder/saved_model.pb
+autoencoder/variables/variables.data-00000-of-00001
+autoencoder/variables/variables.index

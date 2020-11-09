@@ -70,15 +70,23 @@ if __name__ == "__main__":
     args = parser.parse_args() 
     # Dataset is save in args.file
 
+    #train_files
     X, y = loadlocal_mnist(
         images_path=args.file,
         labels_path='train-labels-idx1-ubyte')
+    
+
+    #test_files
+    test_X, test_y = loadlocal_mnist(
+        images_path='t10k-images-idx3-ubyte',
+        labels_path='t10k-labels-idx1-ubyte')
     
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
 
     #np.savetxt(fname='images.csv',X=X, delimiter=',',fmt="%d") #uncomment to save it in csv file
 
     train_X = np.reshape(X, (len(X), 28, 28, 1))
+    test_X = np.reshape(test_X, (len(test_X), 28, 28, 1))
     #print(train_X)
 
     # Define the convolutional Autoencoder Model
@@ -97,8 +105,11 @@ if __name__ == "__main__":
     #train_X, valid_X, train_ground, valid_ground = train_test_split(X,X,test_size=0.2, random_state=13)
     #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
 
-    train_X = train_X[:100] #uncomment this in order to train with less images
+    train_X = train_X[:1000] #uncomment this in order to train with less images
     autoencoder_train = autoencoder.fit(train_X, train_X, batch_size = batch_size,epochs = epochs,verbose=1)
+
+    autoencoder.save('autoencoder')
+
 
 
 
