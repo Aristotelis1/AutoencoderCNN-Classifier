@@ -97,7 +97,7 @@ if __name__ == "__main__":
     #train_X, valid_X, train_ground, valid_ground = train_test_split(X,X,test_size=0.2, random_state=13)
     #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
 
-    #
+    train_X = train_X[:100] #uncomment this in order to train with less images
     autoencoder_train = autoencoder.fit(train_X, train_X, batch_size = batch_size,epochs = epochs,verbose=1)
 
 
