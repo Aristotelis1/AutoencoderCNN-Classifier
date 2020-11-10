@@ -23,7 +23,11 @@ if __name__ == "__main__":
 
     reconstructed_model = keras.models.load_model('autoencoder')
 
-
+    print(test_X[0].shape)
+    print(test_X[0])
+    test_X = test_X.astype('float32')
+    test_X = test_X/255.0
+    print(test_X[0])
     test_X = test_X[:10] #uncomment this for less test images
     out_images = reconstructed_model.predict(test_X)
 

@@ -59,6 +59,9 @@ def decoder(conv4):
     return decoded
 
 
+def preprocess(x):
+    x = x.astype('float32') / 255.
+    return x.reshape(-1, np.prod(x.shape[1:])) #flatten
 
 
 if __name__ == "__main__":
@@ -75,37 +78,37 @@ if __name__ == "__main__":
         images_path=args.file,
         labels_path='train-labels-idx1-ubyte')
     
-
-    #test_files
-    test_X, test_y = loadlocal_mnist(
-        images_path='t10k-images-idx3-ubyte',
-        labels_path='t10k-labels-idx1-ubyte')
-    
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
 
     #np.savetxt(fname='images.csv',X=X, delimiter=',',fmt="%d") #uncomment to save it in csv file
 
-    train_X = np.reshape(X, (len(X), 28, 28, 1))
-    test_X = np.reshape(test_X, (len(test_X), 28, 28, 1))
+    #test_X = np.reshape(test_X, (len(test_X), 28, 28, 1))
     #print(train_X)
 
     # Define the convolutional Autoencoder Model
     x, y = 28, 28
     inChannel = 1
-    batch_size = 128
+    batch_size = 128 #128 stis diafaneies
     epochs = 50
     input_img =  Input(shape=(x, y, inChannel), name='input')
 
 
+    train_X = np.reshape(X, (len(X), 28, 28, 1))
+    print(train_X[0].shape)
+    print(train_X[0])
+    train_X = train_X.astype('float32')
+    train_X = train_X/255.0
+    print(train_X[0])
+    
     autoencoder = Model(input_img, decoder(encoder(input_img)))
-    autoencoder.compile(loss='mean_squared_error', optimizer = RMSprop())
+    autoencoder.compile(loss='mean_squared_error', optimizer = "adam") #RMSprop() stis diafaneies
     #autoencoder.summary() #uncomment to see the summary of the AE
 
-
-    #train_X, valid_X, train_ground, valid_ground = train_test_split(X,X,test_size=0.2, random_state=13)
+    #train_X = preprocess(train_X)
+    #train_X, valid_X = train_test_split(X,test_size=0.2, random_state=13)
     #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
 
-    train_X = train_X[:1000] #uncomment this in order to train with less images
+    train_X = train_X[:2000] #uncomment this in order to train with less images
     autoencoder_train = autoencoder.fit(train_X, train_X, batch_size = batch_size,epochs = epochs,verbose=1)
 
     autoencoder.save('autoencoder')
