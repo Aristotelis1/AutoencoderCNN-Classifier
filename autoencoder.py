@@ -119,13 +119,15 @@ if __name__ == "__main__":
         pl = input("Type 'yes' to plot: ")
         if(pl == 'yes'):
             #summarize history for loss
-            plt.plot(history.history['loss'],label="train loss")
-            plt.plot(history.history['val_loss'],label="val loss")
+            plt.plot(history.history['loss'], label= 'train loss')
+            plt.plot(history.history['val_loss'], label= 'val loss')
             plt.title('model loss')
             plt.ylabel('loss')
-            plt.xlabel('epoch')
-            #l1 = plt.legend(['train_loss', 'val_loss'], loc='upper left')
-            plt.legend((batch_size,inChannel,filters),('batch size: ','inChannel: ', 'filters: '))
+            plt.xlabel('epochs')
+#            plt.legend(['train_loss', 'val_loss'], loc='upper left')
+            plt.title('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(batch_size, inChannel, epochs, filters), loc='left')
+
+            plt.legend()
             plt.show()
         
         next_move = input("Type 'save' to save: ")
