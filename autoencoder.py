@@ -94,15 +94,18 @@ if __name__ == "__main__":
     print(train_X[0])
     
     autoencoder = Model(input_img, decoder(encoder(input_img)))
-    autoencoder.compile(loss='mean_squared_error', optimizer = "adam") #RMSprop() stis diafaneies
+    autoencoder.compile(loss='mean_squared_error', optimizer = RMSprop()) #RMSprop() stis diafaneies
     #autoencoder.summary() #uncomment to see the summary of the AE
 
     #train_X = preprocess(train_X)
-    #train_X, valid_X = train_test_split(X,test_size=0.2, random_state=13)
+    train_X, valid_X, train_ground, valid_ground = train_test_split(train_X,train_X,test_size=0.2, random_state=13)
     #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
 
-    train_X = train_X[:1000] #uncomment this in order to train with less images
-    autoencoder_train = autoencoder.fit(train_X, train_X, batch_size = batch_size,epochs = epochs,verbose=1)
+    train_X = train_X[:1000] #uncomment this, in order to train with less images
+    train_ground = train_ground[:1000] #uncomment if the above line is uncommented.
+    valid_X = valid_X[:1000] #same
+    valid_ground = valid_ground[:1000] #same
+    autoencoder_train = autoencoder.fit(train_X, train_ground, batch_size = batch_size,epochs = epochs,verbose=1, validation_data=(valid_X,valid_ground))
 
     autoencoder.save('autoencoder')
 
