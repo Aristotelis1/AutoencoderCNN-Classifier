@@ -57,11 +57,6 @@ def decoder(conv4):
     return decoded
 
 
-def preprocess(x):
-    x = x.astype('float32') / 255.
-    return x.reshape(-1, np.prod(x.shape[1:])) #flatten
-
-
 if __name__ == "__main__":
 
     # reading the mnist files
