@@ -43,8 +43,6 @@ def decoder(conv4):
     #decoder
     conv5 = Conv2D(128, (3, 3), activation='relu', padding='same')(conv4) #7 x 7 x 128
     conv5 = BatchNormalization()(conv5)
-    conv5 = Conv2D(128, (3, 3), activation='relu', padding='same')(conv5)
-    conv5 = BatchNormalization()(conv5)
     conv6 = Conv2D(64, (3, 3), activation='relu', padding='same')(conv5) #7 x 7 x 64
     conv6 = BatchNormalization()(conv6)
     conv6 = Conv2D(64, (3, 3), activation='relu', padding='same')(conv6)
@@ -108,7 +106,7 @@ if __name__ == "__main__":
     #train_X, valid_X = train_test_split(X,test_size=0.2, random_state=13)
     #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
 
-    train_X = train_X[:2000] #uncomment this in order to train with less images
+    train_X = train_X[:1000] #uncomment this in order to train with less images
     autoencoder_train = autoencoder.fit(train_X, train_X, batch_size = batch_size,epochs = epochs,verbose=1)
 
     autoencoder.save('autoencoder')
