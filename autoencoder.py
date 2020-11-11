@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 import argparse
 from mlxtend.data import loadlocal_mnist
 import platform
+import math
 
 
 
@@ -47,6 +48,8 @@ def decoder(conv4,filters):
     filters=filters*8
     conv5 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4) #7 x 7 x 128
     conv5 = BatchNormalization()(conv5)
+    conv5 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv5)
+    conv5 = BatchNormalization()(conv5)
     filters=filters/2
     conv6 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv5) #7 x 7 x 64
     conv6 = BatchNormalization()(conv6)
@@ -78,16 +81,21 @@ if __name__ == "__main__":
         labels_path='train-labels-idx1-ubyte')
     
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
+    number_of_images = int(X.shape[0])
+    dimensions = int(X.shape[1])
+    number_of_images = 500 #uncomment to test it with less images
 
     #np.savetxt(fname='images.csv',X=X, delimiter=',',fmt="%d") #uncomment to save it in csv file
 
     #test_X = np.reshape(test_X, (len(test_X), 28, 28, 1))
     #print(train_X)
 
+    history_list = []
+
     while(1):
 
         # Define the convolutional Autoencoder Model
-        x, y = 28, 28
+        x, y = int(math.sqrt(dimensions)), int(math.sqrt(dimensions))
         inChannel =  input("inChannel: ")
         batch_size = input("Batch Size: ") #128 stis diafaneies
         epochs = input("Epochs ")
@@ -110,30 +118,32 @@ if __name__ == "__main__":
         #autoencoder.summary() #uncomment to see the summary of the AE
 
         #train_X = preprocess(train_X)
-        train_X = train_X[:200] # uncomment if you want less images
+        train_X = train_X[:number_of_images] # uncomment if you want less images
         train_X, valid_X, train_ground, valid_ground = train_test_split(train_X,train_X,test_size=0.2, random_state=13)
         #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
 
         history = autoencoder.fit(train_X, train_ground, batch_size = batch_size,epochs = epochs,verbose=1, validation_data=(valid_X,valid_ground))
-
+        history_list.append((history,batch_size,inChannel,epochs,filters))
         pl = input("Type 'yes' to plot: ")
         if(pl == 'yes'):
-            #summarize history for loss
-            plt.plot(history.history['loss'], label= 'train loss')
-            plt.plot(history.history['val_loss'], label= 'val loss')
-            plt.title('model loss')
-            plt.ylabel('loss')
-            plt.xlabel('epochs')
-#            plt.legend(['train_loss', 'val_loss'], loc='upper left')
-            plt.title('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(batch_size, inChannel, epochs, filters), loc='left')
 
-            plt.legend()
-            plt.show()
+            for history in history_list:
+                #summarize history for loss
+                plt.plot(history[0].history['loss'], label= 'train loss')
+                plt.plot(history[0].history['val_loss'], label= 'val loss')
+                plt.title('model loss')
+                plt.ylabel('loss')
+                plt.xlabel('epochs')
+    #            plt.legend(['train_loss', 'val_loss'], loc='upper left')
+                plt.title('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(history[1], history[2], history[3], history[4]), loc='left')
+
+                plt.legend()
+                plt.show()
         
         next_move = input("Type 'save' to save: ")
         if(next_move == 'save'):
             path = input("Give me the path to save the previous autoencoder: ")
-            autoencoder.save(path)
+            autoencoder.save_weights(path)
 
         next_move = input("Type '0' to stop: ")
         if(next_move == '0'):
