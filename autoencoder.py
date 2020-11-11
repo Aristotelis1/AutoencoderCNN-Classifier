@@ -98,7 +98,7 @@ if __name__ == "__main__":
         x, y = int(math.sqrt(dimensions)), int(math.sqrt(dimensions))
         inChannel =  input("inChannel: ")
         batch_size = input("Batch Size: ") #128 stis diafaneies
-        epochs = input("Epochs ")
+        epochs = input("Epochs: ")
         inChannel = int(inChannel)
         batch_size = int(batch_size)
         epochs = int(epochs)
@@ -143,7 +143,7 @@ if __name__ == "__main__":
         next_move = input("Type 'save' to save: ")
         if(next_move == 'save'):
             path = input("Give me the path to save the previous autoencoder: ")
-            autoencoder.save_weights(path)
+            autoencoder.save(path)
 
         next_move = input("Type '0' to stop: ")
         if(next_move == '0'):
