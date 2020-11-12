@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import keras
 from keras.layers import MaxPooling2D, UpSampling2D
-from keras.layers import Conv2D, Input, BatchNormalization
+from keras.layers import Conv2D, Input, BatchNormalization, Dropout
 from keras.optimizers import RMSprop
 from keras.models import Model
 import matplotlib.pyplot as plt
@@ -26,11 +26,13 @@ def encoder(input_img, filters):
     conv1 = BatchNormalization()(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
     filters=filters*2
+    # pool1 = Dropout(0.25)(pool1)
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
     conv2 = BatchNormalization()(conv2)
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
     conv2 = BatchNormalization()(conv2)
     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
+    # pool2 = Dropout(0.25)(pool2)
     filters=filters*2
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
     conv3 = BatchNormalization()(conv3)
