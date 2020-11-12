@@ -63,20 +63,21 @@ def encoder(input_img, filters):
     conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(conv1)
     conv1 = BatchNormalization()(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
-    #pool1 = Dropout(0.52)(pool1)    #first dropout na to valw kai ston autoencoder kai na ksanatrexw montelo
+    pool1 = Dropout(0.40)(pool1)    #first dropout na to valw kai ston autoencoder kai na ksanatrexw montelo
     filters=filters*2
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
     conv2 = BatchNormalization()(conv2)
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
     conv2 = BatchNormalization()(conv2)
     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
-    #pool2 = Dropout(0.52)(pool2)    #second dropout
+    pool2 = Dropout(0.40)(pool2)    #second dropout
     filters=filters*2
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
     conv3 = BatchNormalization()(conv3)
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
     conv3 = BatchNormalization()(conv3)
     filters=filters*2
+    #conv3 = Dropout(0.30)(conv3)    #drop3
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
     conv4 = BatchNormalization()(conv4)
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
@@ -85,12 +86,13 @@ def encoder(input_img, filters):
 
 def fully_connected(encode, filters):
     temp = Flatten()(encode)
-    #dence = Dense(128, activation='relu')(temp)
-    #layers = Dense(10, activation='softmax')(dence)
-    
     dence = Dense(128, activation='relu')(temp)
-    drop2 = Dropout(0.3)(dence)     #third dropout
-    layers = Dense(10, activation='softmax')(drop2)
+    dence = Dropout(0.69)(dence)
+    layers = Dense(10, activation='softmax')(dence)
+    
+    # dence = Dense(128, activation='relu')(temp)
+    # drop2 = Dropout(0.3)(dence)     #third dropout
+    # layers = Dense(10, activation='softmax')(drop2)
     return layers
 
 if __name__ == "__main__":
@@ -113,7 +115,7 @@ if __name__ == "__main__":
         labels_path=args.train_labels)
         
     number_of_images_train = int(X.shape[0])
-    number_of_images_train = 2000
+    number_of_images_train = 20000
     dimensions = int(X.shape[1])
 
     X1,Y1 = loadlocal_mnist(
@@ -171,18 +173,18 @@ if __name__ == "__main__":
         encode = encoder(input_img, filters)
         fc_model = Model(input_img, fully_connected(encode, filters))
 #        fc_model = Model(input_img, encode_and_connect(input_img, filters))
-        for m1, m2 in zip(fc_model.layers[:19], model.layers[0:19]):
+        for m1, m2 in zip(fc_model.layers[:21], model.layers[0:21]):
             m1.set_weights(m2.get_weights())
 
         #train only encode
-        for x in fc_model.layers[0:18]:
+        for x in fc_model.layers[0:21]:
             x.trainable=False
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
         train_X,valid_X,train_label,valid_label = train_test_split(train_X,train_Y_one_hot,test_size=0.2,random_state=13)
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochsenc,verbose=1,validation_data=(valid_X, valid_label))
 
         #train whole model
-        for x in fc_model.layers[:]:
+        for x in fc_model.layers[:21]:
             x.trainable=True
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochs,verbose=1,validation_data=(valid_X, valid_label))

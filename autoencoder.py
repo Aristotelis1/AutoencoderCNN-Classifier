@@ -26,19 +26,20 @@ def encoder(input_img, filters):
     conv1 = BatchNormalization()(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
     filters=filters*2
-    # pool1 = Dropout(0.25)(pool1)
+    pool1 = Dropout(0.25)(pool1)    #drop1
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
     conv2 = BatchNormalization()(conv2)
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
     conv2 = BatchNormalization()(conv2)
     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
-    # pool2 = Dropout(0.25)(pool2)
     filters=filters*2
+    pool2 = Dropout(0.25)(pool2)    #drop2
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
     conv3 = BatchNormalization()(conv3)
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
     conv3 = BatchNormalization()(conv3)
     filters=filters*2
+    conv3 = Dropout(0.30)(conv3)    #drop3
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
     conv4 = BatchNormalization()(conv4)
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
     number_of_images = int(X.shape[0])
     dimensions = int(X.shape[1])
-    number_of_images = 1000 #uncomment to test it with less images
+    number_of_images = 5000 #uncomment to test it with less images
 
     #np.savetxt(fname='images.csv',X=X, delimiter=',',fmt="%d") #uncomment to save it in csv file
 
