@@ -83,7 +83,7 @@ if __name__ == "__main__":
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
     number_of_images = int(X.shape[0])
     dimensions = int(X.shape[1])
-    number_of_images = 500 #uncomment to test it with less images
+    number_of_images = 1000 #uncomment to test it with less images
 
     #np.savetxt(fname='images.csv',X=X, delimiter=',',fmt="%d") #uncomment to save it in csv file
 
@@ -108,11 +108,8 @@ if __name__ == "__main__":
 
 
         train_X = np.reshape(X, (len(X), 28, 28, 1))
-        print(train_X[0].shape)
-        print(train_X[0])
         train_X = train_X.astype('float32')
         train_X = train_X/255.0
-        print(train_X[0])
         autoencoder = Model(input_img, decoder(encoder(input_img,filters),filters))
         autoencoder.compile(loss='mean_squared_error', optimizer = RMSprop()) #RMSprop() stis diafaneies
         #autoencoder.summary() #uncomment to see the summary of the AE
@@ -142,7 +139,7 @@ if __name__ == "__main__":
         
         next_move = input("Type 'save' to save: ")
         if(next_move == 'save'):
-            path = input("Give me the path to save the previous autoencoder: ")
+            path = input("Give me the path to save the previous autoencoder model: ")
             autoencoder.save(path)
 
         next_move = input("Type '0' to stop: ")
