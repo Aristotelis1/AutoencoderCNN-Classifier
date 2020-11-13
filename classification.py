@@ -18,41 +18,41 @@ import platform
 from keras.models import load_model
 import math
 
-def encode_and_connect(input_img, filters):
-    #input 28 x 28 x 1
+# def encode_and_connect(input_img, filters):
+#     #input 28 x 28 x 1
 
-    conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(input_img) # 28 x 28 x 32
-    conv1 = BatchNormalization()(conv1)
-    conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(conv1)
-    conv1 = BatchNormalization()(conv1)
-    pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
-    # pool1 = Dropout(0.52)(pool1)
-    filters=filters*2
-    conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
-    conv2 = BatchNormalization()(conv2)
-    conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
-    conv2 = BatchNormalization()(conv2)
-    pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
-    # pool2 = Dropout(0.52)(pool2)
-    filters=filters*2
-    conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
-    conv3 = BatchNormalization()(conv3)
-    conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
-    conv3 = BatchNormalization()(conv3)
-    filters=filters*2
-    conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
-    conv4 = BatchNormalization()(conv4)
-    conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
-    conv4 = BatchNormalization()(conv4)
-    temp = Flatten()(conv4)
-    dence = Dense(128, activation='relu')(temp)
-    layers = Dense(10, activation='softmax')(dence)
+#     conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(input_img) # 28 x 28 x 32
+#     conv1 = BatchNormalization()(conv1)
+#     conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(conv1)
+#     conv1 = BatchNormalization()(conv1)
+#     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
+#     # pool1 = Dropout(0.52)(pool1)
+#     filters=filters*2
+#     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
+#     conv2 = BatchNormalization()(conv2)
+#     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
+#     conv2 = BatchNormalization()(conv2)
+#     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
+#     # pool2 = Dropout(0.52)(pool2)
+#     filters=filters*2
+#     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
+#     conv3 = BatchNormalization()(conv3)
+#     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
+#     conv3 = BatchNormalization()(conv3)
+#     filters=filters*2
+#     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
+#     conv4 = BatchNormalization()(conv4)
+#     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
+#     conv4 = BatchNormalization()(conv4)
+#     temp = Flatten()(conv4)
+#     dence = Dense(128, activation='relu')(temp)
+#     layers = Dense(10, activation='softmax')(dence)
     
-    # drop1 = Dropout(0.25)(temp)
-    # dence = Dense(128, activation='relu')(drop1)
-    # drop2 = Dropout(0.3)(dence)
-    # layers = Dense(10, activation='softmax')(drop2)
-    return layers
+#     # drop1 = Dropout(0.25)(temp)
+#     # dence = Dense(128, activation='relu')(drop1)
+#     # drop2 = Dropout(0.3)(dence)
+#     # layers = Dense(10, activation='softmax')(drop2)
+#     return layers
 
 def encoder(input_img, filters):
     #encoder
@@ -63,14 +63,14 @@ def encoder(input_img, filters):
     conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(conv1)
     conv1 = BatchNormalization()(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
-    pool1 = Dropout(0.50)(pool1)    #first dropout
+    pool1 = Dropout(0.40)(pool1)    #first dropout
     filters=filters*2
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
     conv2 = BatchNormalization()(conv2)
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
     conv2 = BatchNormalization()(conv2)
     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
-    pool2 = Dropout(0.50)(pool2)    #second dropout
+    pool2 = Dropout(0.40)(pool2)    #second dropout
     filters=filters*2
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
     conv3 = BatchNormalization()(conv3)
@@ -87,7 +87,7 @@ def encoder(input_img, filters):
 def fully_connected(encode, filters):
     temp = Flatten()(encode)
     dence = Dense(128, activation='relu')(temp)
-    dence = Dropout(0.55)(dence)
+    dence = Dropout(0.40)(dence)
     layers = Dense(10, activation='softmax')(dence)
     
     # dence = Dense(128, activation='relu')(temp)
@@ -179,14 +179,14 @@ if __name__ == "__main__":
         for m1, m2 in zip(fc_model.layers[:21], model.layers[0:21]):
             m1.set_weights(m2.get_weights())
 
-        #train only encode
+        #train only encode (all layers after 20 layers of encode since its pretrained)
         for x in fc_model.layers[0:21]:
             x.trainable=False
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
-        train_X,valid_X,train_label,valid_label = train_test_split(train_X,train_Y_one_hot,test_size=0.4,random_state=13)
+        train_X,valid_X,train_label,valid_label = train_test_split(train_X,train_Y_one_hot,test_size=0.20,random_state=13)   #splitting persentage can change
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochsenc,verbose=1,validation_data=(valid_X, valid_label))
 
-        #train whole model
+        #train whole model (all layers including already trained)
         for x in fc_model.layers[:21]:
             x.trainable=True
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])

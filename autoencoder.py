@@ -4,7 +4,7 @@ import keras
 from keras.layers import MaxPooling2D, UpSampling2D
 from keras.layers import Conv2D, Input, BatchNormalization, Dropout
 from keras.optimizers import RMSprop
-from keras.models import Model
+from keras.models import Model, load_model
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
@@ -114,6 +114,13 @@ if __name__ == "__main__":
         train_X = train_X.astype('float32')
         train_X = train_X/255.0
         autoencoder = Model(input_img, decoder(encoder(input_img,filters),filters))
+        trained = input("Type 'pre' to use pretrained model: ")
+        if(trained == 'pre'):       #option to use pretrained model
+            model_path = input("Give me the path to pretrained model: ")
+            model = load_model(model_path)
+            weights = model.get_weights()
+            for m1, m2 in zip(autoencoder.layers[:], model.layers[:]):
+                m1.set_weights(m2.get_weights())
         autoencoder.compile(loss='mean_squared_error', optimizer = RMSprop()) #RMSprop() stis diafaneies
         #autoencoder.summary() #uncomment to see the summary of the AE
 
