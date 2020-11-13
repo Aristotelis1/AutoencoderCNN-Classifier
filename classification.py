@@ -142,11 +142,12 @@ if __name__ == "__main__":
 #    model.summary()
 
     history_list = []
+    prediction_list = []
     while(1):
         x, y = int(math.sqrt(dimensions)), int(math.sqrt(dimensions))
         inChannel =  input("inChannel: ")
         batch_size = input("Batch Size: ") #128 stis diafaneies
-        epochsenc = input("Epochs for encoding part: ")
+        epochsenc = input("Epochs for fully connected part: ")
         epochs = input("Epochs for whole model: ")
         inChannel = int(inChannel)
         batch_size = int(batch_size)
@@ -193,10 +194,22 @@ if __name__ == "__main__":
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochs,verbose=1,validation_data=(valid_X, valid_label))
 
         history_list.append((fc_train,batch_size,inChannel,epochs,filters))
+        predicted_classes = fc_model.predict(test_X)
+        predicted_classes = np.argmax(np.round(predicted_classes),axis=1)
+
+        test_eval = fc_model.evaluate(test_X, test_Y_one_hot, verbose=0)
+
+
+        prediction_list.append((predicted_classes,test_eval))
 
         pl = input("Type 'yes' to plot: ")
         if(pl == 'yes'):
-            for history in history_list:
+            for history,predict in zip(history_list,prediction_list):
+                print('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(history[1], history[2], history[3], history[4]))
+                target_names = ["Number {}".format(i) for i in range(10)]
+                print('Test loss:', predict[1][0])
+                print('Test accuracy:', predict[1][1])
+                print(classification_report(Y1, predict[0], target_names=target_names))
                 accuracy = history[0].history['accuracy']
                 val_accuracy = history[0].history['val_accuracy']
                 loss = history[0].history['loss']
@@ -219,28 +232,47 @@ if __name__ == "__main__":
 
         next_move = input("Type 'print' to print: ")
         if(next_move == 'print'):
-            test_eval = fc_model.evaluate(test_X, test_Y_one_hot, verbose=0)
-            print('Test loss:', test_eval[0])
-            print('Test accuracy:', test_eval[1])
-            
-            predicted_classes = fc_model.predict(test_X)
-            predicted_classes = np.argmax(np.round(predicted_classes),axis=1)
-            #predicted_classes.shape, test_labels.shape
-            
-            correct = np.where(predicted_classes==Y1)[0]
-            print ("Found %d correct labels" % len(correct))
-            incorrect = np.where(predicted_classes!=Y1)[0]
-            print ("Found %d incorrect labels" % len(incorrect))
+            # test_eval = fc_model.evaluate(test_X, test_Y_one_hot, verbose=0)
+            # print('Test loss:', test_eval[0])
+            # print('Test accuracy:', test_eval[1])
+            flag = False
+            while(flag == False):
+                uinChannel =  input("inChannel: ")
+                ubatch_size = input("Batch Size: ") #128 stis diafaneies
+                uepochsenc = input("Epochs for fully connected part: ")
+                uepochs = input("Epochs for whole model: ")
+                uinChannel = int(uinChannel)
+                ubatch_size = int(ubatch_size)
+                uepochs = int(uepochs)
+                uepochsenc = int(uepochsenc)
+                ufilters = input("Give me the number of filters: ")
+                ufilters = int(ufilters)
+                #flag = False
+                for history,predict in zip(history_list,prediction_list):
+                    if(history[1] == ubatch_size and history[2] == uinChannel and history[3] == uepochs and history[4] == ufilters):
+                        # predicted_classes = fc_model.predict(test_X)
+                        # predicted_classes = np.argmax(np.round(predicted_classes),axis=1)
+                        #predicted_classes.shape, test_labels.shape
+                        correct = np.where(predict[0]==Y1)[0]
+                        print ("Found %d correct labels" % len(correct))
+                        incorrect = np.where(predict[0] !=Y1)[0]
+                        print ("Found %d incorrect labels" % len(incorrect))
 
-            for i, num in enumerate(test_X[:25]):
-                plt.subplot(5,5,i+1)
-                plt.imshow(test_X[i].reshape(28,28), cmap='gray', interpolation='none')
-                plt.title("Predicted {}, Label {}".format(predicted_classes[i], Y1[i]))
-                plt.tight_layout()
-            plt.show()
+                        for i, num in enumerate(test_X[:25]):
+                            plt.subplot(5,5,i+1)
+                            plt.imshow(test_X[i].reshape(28,28), cmap='gray', interpolation='none')
+                            plt.title("Predicted {}, Label {}".format(predict[0][i], Y1[i]))
+                            plt.tight_layout()
+                        plt.show()
+                        flag = True
+                if(flag == False):
+                    print("Not found")
+                    answer = input("You want to try again? Type 'yes': ")
+                    if(answer != 'yes'):
+                        break
 
-            target_names = ["Number {}".format(i) for i in range(10)]
-            print(classification_report(Y1, predicted_classes, target_names=target_names))
+            # target_names = ["Number {}".format(i) for i in range(10)]
+            # print(classification_report(Y1, predicted_classes, target_names=target_names))
 
         next_move = input("Type 'save' to save: ")
         if(next_move == 'save'):
@@ -249,4 +281,4 @@ if __name__ == "__main__":
 
         next_move = input("Type '0' to stop: ")
         if(next_move == '0'):
-            quit()
+            exit()
