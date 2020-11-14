@@ -39,7 +39,7 @@ def encoder(input_img, filters):
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
     conv3 = BatchNormalization()(conv3)
     filters=filters*2
-    #conv3 = Dropout(0.30)(conv3)    #drop3
+    # conv3 = Dropout(0.2)(conv3)    #drop3
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
     conv4 = BatchNormalization()(conv4)
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
@@ -86,8 +86,14 @@ if __name__ == "__main__":
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
     number_of_images = int(X.shape[0])
     dimensions = int(X.shape[1])
-    number_of_images = 2000 #uncomment to test it with less images
-
+    part = input("Type 'part' to use a part of your dataset: ")
+    if(part == "part"):
+        part = input("Type the number of images you want to train: ")
+        part = int(part)
+        if(part>number_of_images):
+            print('You typed more images than expected. We will work with whole dataset.')
+        else:
+            number_of_images = part
     #np.savetxt(fname='images.csv',X=X, delimiter=',',fmt="%d") #uncomment to save it in csv file
 
     #test_X = np.reshape(test_X, (len(test_X), 28, 28, 1))

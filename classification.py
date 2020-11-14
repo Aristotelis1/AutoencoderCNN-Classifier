@@ -70,7 +70,7 @@ def encoder(input_img, filters):
     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
     conv2 = BatchNormalization()(conv2)
     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
-    pool2 = Dropout(0.40)(pool2)    #second dropout
+    pool2 = Dropout(0.30)(pool2)    #second dropout
     filters=filters*2
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
     conv3 = BatchNormalization()(conv3)
@@ -89,10 +89,6 @@ def fully_connected(encode, filters):
     dence = Dense(128, activation='relu')(temp)
     dence = Dropout(0.40)(dence)
     layers = Dense(10, activation='softmax')(dence)
-    
-    # dence = Dense(128, activation='relu')(temp)
-    # drop2 = Dropout(0.3)(dence)     #third dropout
-    # layers = Dense(10, activation='softmax')(drop2)
     return layers
 
 if __name__ == "__main__":
@@ -115,7 +111,7 @@ if __name__ == "__main__":
         labels_path=args.train_labels)
         
     number_of_images_train = int(X.shape[0])
-    number_of_images_train = 6000
+    number_of_images_train = 5000
     dimensions = int(X.shape[1])
 
     X1,Y1 = loadlocal_mnist(
@@ -123,7 +119,7 @@ if __name__ == "__main__":
         labels_path=args.test_labels)
         
     number_of_images_test = int(X1.shape[0])
-    number_of_images_test = 1000
+    number_of_images_test = 850
 
 
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
