@@ -8,11 +8,14 @@ from keras.models import Model, load_model
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
+# from tensorflow.contrib.learn.python.learn.datasets.mnist import extract_images, extract_labels
+
 
 import argparse
 from mlxtend.data import loadlocal_mnist
 import platform
 import math
+import struct
 
 
 
@@ -79,9 +82,13 @@ if __name__ == "__main__":
     # Dataset is save in args.file
 
     #train_files
-    X, y = loadlocal_mnist(
-        images_path=args.file,
-        labels_path='train-labels-idx1-ubyte')
+    # X, y = loadlocal_mnist(
+    #     images_path=args.file,
+    #     labels_path='train-labels-idx1-ubyte')
+    
+    with open(args.file, 'rb') as imgpath:
+        magic, num, rows, cols = struct.unpack(">IIII",imgpath.read(16))
+        X = np.fromfile(imgpath,dtype=np.uint8).reshape(num, 784)
     
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
     number_of_images = int(X.shape[0])

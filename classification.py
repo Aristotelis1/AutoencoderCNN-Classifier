@@ -111,7 +111,15 @@ if __name__ == "__main__":
         labels_path=args.train_labels)
         
     number_of_images_train = int(X.shape[0])
-    number_of_images_train = 5000
+    part = input("Type 'part' to use a part of your dataset: ")
+    if(part == "part"):
+        part = input("Type the number of images you want to train: ")
+        part = int(part)
+        if(part>number_of_images_train):
+            print('You typed more images than expected. We will work with whole dataset.')
+        else:
+            number_of_images_train = part
+    #number_of_images_train = 5000
     dimensions = int(X.shape[1])
 
     X1,Y1 = loadlocal_mnist(
@@ -119,7 +127,15 @@ if __name__ == "__main__":
         labels_path=args.test_labels)
         
     number_of_images_test = int(X1.shape[0])
-    number_of_images_test = 850
+    part = input("Type 'part' to use a part of your testset: ")
+    if(part == "part"):
+        part = input("Type the number of images you want to test: ")
+        part = int(part)
+        if(part>number_of_images_test):
+            print('You typed more images than expected. We will work with whole testset.')
+        else:
+            number_of_images_test = part
+    #number_of_images_test = 850
 
 
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))

@@ -7,4 +7,3 @@ autoencoder/saved_model.pb
 autoencoder/variables/variables.data-00000-of-00001
 autoencoder/variables/variables.index
 .DS_Store
-autoencoder.ipynb
