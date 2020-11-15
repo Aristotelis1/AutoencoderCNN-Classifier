@@ -191,18 +191,18 @@ if __name__ == "__main__":
         encode = encoder(input_img, filters)
         fc_model = Model(input_img, fully_connected(encode, filters))
 #        fc_model = Model(input_img, encode_and_connect(input_img, filters))
-        for m1, m2 in zip(fc_model.layers[:21], model.layers[0:23]):
+        for m1, m2 in zip(fc_model.layers[:22], model.layers[0:22]):
             m1.set_weights(m2.get_weights())
 
         #train only encode (all layers after 20 layers of encode since its pretrained)
-        for x in fc_model.layers[0:23]:
+        for x in fc_model.layers[0:22]:
             x.trainable=False
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
         train_X,valid_X,train_label,valid_label = train_test_split(train_X,train_Y_one_hot,test_size=0.20,random_state=13)   #splitting persentage can change
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochsenc,verbose=1,validation_data=(valid_X, valid_label))
 
         #train whole model (all layers including already trained)
-        for x in fc_model.layers[:23]:
+        for x in fc_model.layers[:22]:
             x.trainable=True
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochs,verbose=1,validation_data=(valid_X, valid_label))
