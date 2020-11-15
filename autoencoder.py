@@ -36,17 +36,18 @@ def encoder(input_img, filters):
     conv2 = BatchNormalization()(conv2)
     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
     filters=filters*2
-    pool2 = Dropout(0.30)(pool2)    #drop2
+    pool2 = Dropout(0.40)(pool2)    #drop2
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
     conv3 = BatchNormalization()(conv3)
     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
     conv3 = BatchNormalization()(conv3)
     filters=filters*2
-    # conv3 = Dropout(0.2)(conv3)    #drop3
+    conv3 = Dropout(0.40)(conv3)    #drop3
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
     conv4 = BatchNormalization()(conv4)
     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
     conv4 = BatchNormalization()(conv4)
+    # conv4 = Dropout(0.40)(conv4)    #drop4
     return conv4
 
 def decoder(conv4,filters):
