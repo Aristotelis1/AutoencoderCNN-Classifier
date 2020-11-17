@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
         encode = encoder(input_img,CNN_convs, filters_size_list, kernel_size_list, dropout_list)
         fc_model = Model(input_img, fully_connected(encode, fc_dense_size,fc_dropout))
-        print(len(fc_model.layers))
+        enco_layers = len(fc_model.layers)-5
         trained = input("Type 'pre' to use pretrained model: ")
         if(trained == 'pre'):       #option to use pretrained model
             model_path = input("Give me the path to pretrained model: ")
@@ -191,23 +191,26 @@ if __name__ == "__main__":
             for m1, m2 in zip(fc_model.layers[:], model.layers[:]):
                 m1.set_weights(m2.get_weights())
         else:
-            for m1, m2 in zip(fc_model.layers[:22], model.layers[0:22]):
+            for m1, m2 in zip(fc_model.layers[:enco_layers], model.layers[0:enco_layers]):
                 m1.set_weights(m2.get_weights())
 
         #train only encode (all layers after 20 layers of encode since its pretrained)
-        for x in fc_model.layers[0:22]:
+        for x in fc_model.layers[0:enco_layers]:
             x.trainable=False
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
         train_X,valid_X,train_label,valid_label = train_test_split(train_X,train_Y_one_hot,test_size=0.20,random_state=13)   #splitting persentage can change
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochsenc,verbose=1,validation_data=(valid_X, valid_label))
 
         #train whole model (all layers including already trained)
-        for x in fc_model.layers[:22]:
+        for x in fc_model.layers[:enco_layers]:
             x.trainable=True
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochs,verbose=1,validation_data=(valid_X, valid_label))
+        filters = (','.join(str(x) for x in filters_size_list))
+        kernel = (','.join(str(x) for x in kernel_size_list))
+        drops = (','.join(str(x) for x in dropout_list))
 
-        history_list.append((fc_train,batch_size,inChannel,epochs,filters))
+        history_list.append((fc_train,batch_size,inChannel,epochsenc, epochs, CNN_convs, filters, kernel, drops, fc_dense_size, fc_dropout))
         predicted_classes = fc_model.predict(test_X)
         predicted_classes = np.argmax(np.round(predicted_classes),axis=1)
 
@@ -219,7 +222,7 @@ if __name__ == "__main__":
         pl = input("Type 'yes' to plot: ")
         if(pl == 'yes'):
             for history,predict in zip(history_list,prediction_list):
-                print('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(history[1], history[2], history[3], history[4]))
+                print('Batches: %d\ninChannell: %d\nEpochs (): %d\nFilters: %d' %(history[1], history[2], history[3], history[4]))
                 target_names = ["Number {}".format(i) for i in range(10)]
                 print('Test loss:', predict[1][0])
                 print('Test accuracy:', predict[1][1])
@@ -231,15 +234,15 @@ if __name__ == "__main__":
                 epochs = range(len(accuracy))
                 plt.plot(epochs, accuracy, 'bo', label='Training accuracy')
                 plt.plot(epochs, val_accuracy, 'b', label='Validation accuracy')
-                plt.title('Training and validation accuracy')
-                plt.title('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(history[1], history[2], history[3], history[4]), loc='left')
+                plt.title('Filters: %s\nKernel size: %s\nDropout(encoder): %s\nNeurons FC: %d\nDropout(fc): %s' %(history[6], history[7], history[8], history[9], history[10]), loc='left')
+                plt.title('Convolutions: %d\nBatches: %d\ninChannell: %d\nEpochs for fc: %d\nEpochs for model: %d' %(history[5], history[1], history[2], history[3], history[4]), loc='right')
                 plt.xlabel('epochs')
                 plt.legend()
                 plt.figure()
                 plt.plot(epochs, loss, 'bo', label='Training loss')
                 plt.plot(epochs, val_loss, 'b', label='Validation loss')
-                plt.title('Training and validation loss')
-                plt.title('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(history[1], history[2], history[3], history[4]), loc='left')
+                plt.title('Filters: %s\nKernel size: %s\nDropout(encoder): %s\nNeurons FC: %d\nDropout(fc): %s' %(history[6], history[7], history[8], history[9], history[10]), loc='left')
+                plt.title('Convolutions: %d\nBatches: %d\ninChannell: %d\nEpochs for fc: %d\nEpochs for model: %d' %(history[5], history[1], history[2], history[3], history[4]), loc='right')
                 plt.xlabel('epochs')
                 plt.legend()
                 plt.show()
@@ -251,22 +254,24 @@ if __name__ == "__main__":
             # print('Test accuracy:', test_eval[1])
             flag = False
             while(flag == False):
-                uinChannel =  input("inChannel: ")
                 ubatch_size = input("Batch Size: ") #128 stis diafaneies
                 uepochsenc = input("Epochs for fully connected part: ")
                 uepochs = input("Epochs for whole model: ")
-                uinChannel = int(uinChannel)
+                pre = input("Type 'yes' if you didn't create model: ")
+                if (pre == "yes"):
+                    uconvs=8
+                    ufc_neurons=128
+                else:
+                    uconvs = input("Convolutions on encoder part: ")
+                    ufc_neurons = input("Neurons on fully connected part: ")
+                    ufc_neurons = int(ufc_neurons)
+                    uconvs = int(uconvs)    
+                uepochsenc = int(uepochsenc)
                 ubatch_size = int(ubatch_size)
                 uepochs = int(uepochs)
-                uepochsenc = int(uepochsenc)
-                ufilters = input("Give me the number of filters: ")
-                ufilters = int(ufilters)
                 #flag = False
                 for history,predict in zip(history_list,prediction_list):
-                    if(history[1] == ubatch_size and history[2] == uinChannel and history[3] == uepochs and history[4] == ufilters):
-                        # predicted_classes = fc_model.predict(test_X)
-                        # predicted_classes = np.argmax(np.round(predicted_classes),axis=1)
-                        #predicted_classes.shape, test_labels.shape
+                    if(history[1] == ubatch_size and history[3] == uepochsenc and history[4] == uepochs and history[5] == uconvs and history[9] == ufc_neurons):
                         correct = np.where(predict[0]==Y1)[0]
                         print ("Found %d correct labels" % len(correct))
                         incorrect = np.where(predict[0] !=Y1)[0]

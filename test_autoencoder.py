@@ -76,6 +76,8 @@ def decoder(model, convolutions, filter_size, kernel_size, dropout_size):
         if (convolutions==4):
             model = UpSampling2D((2,2))(model)
             model = UpSampling2D((2,2))(model)
+        if (convolutions==6):
+            model = UpSampling2D((2,2))(model)
 
         for i in range(convolutions-5 , -1, -2):
             model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model) # 28 x 28 x 32
@@ -188,9 +190,13 @@ if __name__ == "__main__":
         train_X = train_X[:number_of_images] # uncomment if you want less images
         train_X, valid_X, train_ground, valid_ground = train_test_split(train_X,train_X,test_size=0.2, random_state=13)
         #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
+        filters = (','.join(str(x) for x in filters_size_list))
+        kernel = (','.join(str(x) for x in kernel_size_list))
+        drops = (','.join(str(x) for x in dropout_list))
+
 
         history = autoencoder.fit(train_X, train_ground, batch_size = batch_size,epochs = epochs,verbose=1, validation_data=(valid_X,valid_ground))
-        history_list.append((history,batch_size,inChannel,epochs))
+        history_list.append((history,batch_size,inChannel,epochs, CNN_convs, filters, kernel, drops))
         pl = input("Type 'yes' to plot: ")
         if(pl == 'yes'):
 
@@ -198,12 +204,12 @@ if __name__ == "__main__":
                 #summarize history for loss
                 plt.plot(history[0].history['loss'], label= 'train loss')
                 plt.plot(history[0].history['val_loss'], label= 'val loss')
-                plt.title('model loss')
+                plt.title('Convolutions: %d\nFilters: %s\nKernel size: %s\n Dropout: %s' %(history[4], history[5], history[6], history[7]), loc='left')
                 plt.ylabel('loss')
                 plt.xlabel('epochs')
     #            plt.legend(['train_loss', 'val_loss'], loc='upper left')
                 filters = 32
-                plt.title('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(history[1], history[2], history[3], filters), loc='left')
+                plt.title('Batches: %d\ninChannell: %d\nEpochs: %d' %(history[1], history[2], history[3]), loc='right')
                 plt.legend()
                 plt.show()
         
