@@ -87,9 +87,9 @@ def encoder(input_img, filters):
 
 def fully_connected(encode, filters):
     temp = Flatten()(encode)
-    dence = Dense(1024, activation='relu')(temp)
+    dence = Dense(126, activation='relu')(temp)
     dence = BatchNormalization()(dence)
-    dence = Dropout(0.40)(dence)
+    dence = Dropout(0.8)(dence)
     layers = Dense(10, activation='softmax')(dence)
     return layers
 
@@ -139,7 +139,6 @@ if __name__ == "__main__":
             number_of_images_test = part
     #number_of_images_test = 850
 
-
     print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
     print('Digits:  0 1 2 3 4 5 6 7 8 9')
     print('labels: %s' % np.unique(Y))
@@ -159,11 +158,14 @@ if __name__ == "__main__":
     prediction_list = []
     while(1):
         x, y = int(math.sqrt(dimensions)), int(math.sqrt(dimensions))
-        inChannel =  input("inChannel: ")
+        print("The CNN model has blocks of: 2 convolutions, each followed by 1 BatchNormalization and after that 1 Dropout layer.")
+        print("The first 2 blocks are also followed by 2 downsampling layers so that the final image-layer has shape %s x %s" %(x/4 , y/4))
+        # inChannel =  input("inChannel: ")
+        inChannel = 1
         batch_size = input("Batch Size: ") #128 stis diafaneies
         epochsenc = input("Epochs for fully connected part: ")
         epochs = input("Epochs for whole model: ")
-        inChannel = int(inChannel)
+        # inChannel = int(inChannel)
         batch_size = int(batch_size)
         epochs = int(epochs)
         epochsenc = int(epochsenc)
@@ -190,9 +192,16 @@ if __name__ == "__main__":
 
         encode = encoder(input_img, filters)
         fc_model = Model(input_img, fully_connected(encode, filters))
-#        fc_model = Model(input_img, encode_and_connect(input_img, filters))
-        for m1, m2 in zip(fc_model.layers[:22], model.layers[0:22]):
-            m1.set_weights(m2.get_weights())
+        trained = input("Type 'pre' to use pretrained model: ")
+        if(trained == 'pre'):       #option to use pretrained model
+            model_path = input("Give me the path to pretrained model: ")
+            model = load_model(model_path)
+            weights = model.get_weights()
+            for m1, m2 in zip(fc_model.layers[:], model.layers[:]):
+                m1.set_weights(m2.get_weights())
+        else:
+            for m1, m2 in zip(fc_model.layers[:22], model.layers[0:22]):
+                m1.set_weights(m2.get_weights())
 
         #train only encode (all layers after 20 layers of encode since its pretrained)
         for x in fc_model.layers[0:22]:
