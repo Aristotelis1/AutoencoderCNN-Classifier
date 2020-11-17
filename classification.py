@@ -18,41 +18,6 @@ import platform
 from keras.models import load_model
 import math
 
-# def encode_and_connect(input_img, filters):
-#     #input 28 x 28 x 1
-
-#     conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(input_img) # 28 x 28 x 32
-#     conv1 = BatchNormalization()(conv1)
-#     conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(conv1)
-#     conv1 = BatchNormalization()(conv1)
-#     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
-#     # pool1 = Dropout(0.52)(pool1)
-#     filters=filters*2
-#     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
-#     conv2 = BatchNormalization()(conv2)
-#     conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
-#     conv2 = BatchNormalization()(conv2)
-#     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
-#     # pool2 = Dropout(0.52)(pool2)
-#     filters=filters*2
-#     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
-#     conv3 = BatchNormalization()(conv3)
-#     conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
-#     conv3 = BatchNormalization()(conv3)
-#     filters=filters*2
-#     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
-#     conv4 = BatchNormalization()(conv4)
-#     conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
-#     conv4 = BatchNormalization()(conv4)
-#     temp = Flatten()(conv4)
-#     dence = Dense(128, activation='relu')(temp)
-#     layers = Dense(10, activation='softmax')(dence)
-    
-#     # drop1 = Dropout(0.25)(temp)
-#     # dence = Dense(128, activation='relu')(drop1)
-#     # drop2 = Dropout(0.3)(dence)
-#     # layers = Dense(10, activation='softmax')(drop2)
-#     return layers
 
 def encoder(input_img, filters):
     #encoder
@@ -156,16 +121,29 @@ if __name__ == "__main__":
 
     history_list = []
     prediction_list = []
+
     while(1):
         x, y = int(math.sqrt(dimensions)), int(math.sqrt(dimensions))
-        print("The CNN model has blocks of: 2 convolutions, each followed by 1 BatchNormalization and after that 1 Dropout layer.")
-        print("The first 2 blocks are also followed by 2 downsampling layers so that the final image-layer has shape %s x %s" %(x/4 , y/4))
-        # inChannel =  input("inChannel: ")
-        inChannel = 1
+        print("The CNN model has blocks of: 2 convolutions, each followed by 1 BatchNormalization and after that, 1 Dropout layer, except the last block which doesnt have Dropout after it.")
+        print("The first 2 blocks are also followed by 2 downsampling layers, so that the final image-layer has shape %s x %s" %(x/4 , y/4))
+        CNN_convs = input ("Type the number of convolutions you want: ")
+        CNN_convs = int(CNN_convs)
+        while(CNN_convs < 2):
+            CNN_convs = input ("Type the number of convolutions you want: ")
+            CNN_convs = int(CNN_convs)
+        filters_size_list = []
+        kernel_size_list = []
+        for i in range(0, CNN_convs):
+            filter_size = input ("Type the number of filter in Convolution(%d): " %(i))
+            filters_size_list.append( int(filter_size) )
+            kernel_size = input ("Type the kernel size of Convolution(%d): " %(i))
+            kernel_size_list.append( int(kernel_size) )
+
+        inChannel =  input("inChannel: ")
         batch_size = input("Batch Size: ") #128 stis diafaneies
         epochsenc = input("Epochs for fully connected part: ")
         epochs = input("Epochs for whole model: ")
-        # inChannel = int(inChannel)
+        inChannel = int(inChannel)
         batch_size = int(batch_size)
         epochs = int(epochs)
         epochsenc = int(epochsenc)

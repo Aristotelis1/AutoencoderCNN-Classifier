@@ -35,7 +35,7 @@ def encoder(input_img, convolutions, filter_size, kernel_size, dropout_size):
         model = Conv2D(filter_size[i+1], (kernel_size[i+1],kernel_size[i+1]), activation='relu', padding='same')(model)
         model = BatchNormalization()(model)
         if (i == 2):
-            model = MaxPooling2D(pool_size=(2, 2))(model) # 14 x 14 x 32
+            model = MaxPooling2D(pool_size=(2, 2))(model) #
         if (i!=convolutions-1 and i!=convolutions-2):
             model = Dropout(dropout_size[i+1])(model)    #drop1
 
