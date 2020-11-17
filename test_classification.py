@@ -20,43 +20,37 @@ import math
 
 
 
-def encoder(input_img, filters):
+def encoder(input_img, convolutions, filter_size, kernel_size, dropout_size):
     #encoder
     #input 28 x 28 x 1
 
-    conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(input_img) # 28 x 28 x 32
+    conv1 = Conv2D(filter_size[0], (kernel_size[0],kernel_size[0]), activation='relu', padding='same')(input_img) # 28 x 28 x 32
     conv1 = BatchNormalization()(conv1)
-    conv1 = Conv2D(filters, (3,3), activation='relu', padding='same')(conv1)
+    conv1 = Conv2D(filter_size[1], (kernel_size[1],kernel_size[1]), activation='relu', padding='same')(conv1)
     conv1 = BatchNormalization()(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
-    filters=filters*2
-    pool1 = Dropout(0.3)(pool1)    #drop1
-    conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool1) #14 x 14 x 64
-    conv2 = BatchNormalization()(conv2)
-    conv2 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv2)
-    conv2 = BatchNormalization()(conv2)
-    pool2 = MaxPooling2D(pool_size=(2, 2))(conv2) #7 x 7 x 64
-    filters=filters*2
-    pool2 = Dropout(0.2)(pool2)    #drop2
-    conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(pool2) #7 x 7 x 128 (small & thick)
-    conv3 = BatchNormalization()(conv3)
-    conv3 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3)
-    conv3 = BatchNormalization()(conv3)
-    filters=filters*2
-    conv3 = Dropout(0.1)(conv3)    #drop3
-    conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv3) #7 x 7 x 256 (small & thick)
-    conv4 = BatchNormalization()(conv4)
-    conv4 = Conv2D(filters, (3, 3), activation='relu', padding='same')(conv4)
-    conv4 = BatchNormalization()(conv4)
-    # conv4 = Dropout(0.40)(conv4)    #drop4
-    return conv4
+    model = Dropout(dropout_size[1])(pool1)    #drop1
+    for i in range(2, convolutions-1, 2):
+        model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model) # 28 x 28 x 32
+        model = BatchNormalization()(model)
+        model = Conv2D(filter_size[i+1], (kernel_size[i+1],kernel_size[i+1]), activation='relu', padding='same')(model)
+        model = BatchNormalization()(model)
+        if (i == 2):
+            model = MaxPooling2D(pool_size=(2, 2))(model) #
+        if (i!=convolutions-1 and i!=convolutions-2):
+            model = Dropout(dropout_size[i+1])(model)    #drop1
+    if (convolutions%2 != 0):
+        model = Conv2D(filter_size[convolutions-1], (kernel_size[convolutions-1],kernel_size[convolutions-1]), activation='relu', padding='same')(model)
+        model = BatchNormalization()(model)
+
+    return model
 
 
-def fully_connected(encode, filters):
+def fully_connected(encode, dense_size,dropout_size):
     temp = Flatten()(encode)
-    dence = Dense(128, activation='relu')(temp)
+    dence = Dense(dense_size, activation='relu')(temp)
     dence = BatchNormalization()(dence)
-    dence = Dropout(0.40)(dence)
+    dence = Dropout(dropout_size)(dence)
     layers = Dense(10, activation='softmax')(dence)
     return layers
 
@@ -126,6 +120,39 @@ if __name__ == "__main__":
     prediction_list = []
     while(1):
         x, y = int(math.sqrt(dimensions)), int(math.sqrt(dimensions))
+        CNN_convs = 8
+        filters_size_list = [32,32,64,64,128,128,256,256]
+        kernel_size_list = [3,3,3,3,3,3,3,3]
+        dropout_list = [0,0.3,0,0.3,0,0.3,0,0.3]
+        fc_dense_size = 128
+        fc_dropout = 0.4
+        create = input("Type 'create' if you want to create your own model: ")
+        if(create == 'create'):
+            filters_size_list.clear()
+            kernel_size_list.clear()
+            dropout_list.clear()
+            print("The CNN model has blocks of: 2 convolutions, each followed by 1 BatchNormalization and after that, 1 Dropout layer, except the last block which doesnt have Dropout after it.")
+            print("The first 2 blocks are also followed by 2 downsampling layers, so that the final image-layer has shape %s x %s" %(x/4 , y/4))
+            CNN_convs = input ("Type the number of convolutions you want: ")
+            CNN_convs = int(CNN_convs)
+            while(CNN_convs < 3):
+                CNN_convs = input ("Type the number of convolutions you want: ")
+                CNN_convs = int(CNN_convs)
+
+            for i in range(0, CNN_convs):
+                filter_size = input ("Type the number of filter in Convolution(%d): " %(i+1))
+                filters_size_list.append( int(filter_size) )
+                kernel_size = input ("Type the kernel size of Convolution(%d): " %(i+1))
+                kernel_size_list.append( int(kernel_size) )
+                if (i%2 == 1 and i!=CNN_convs-1):
+                    dropout_size = input ("Type the dropout size (0.xx) after Convolution(%d): " %(i+1))
+                    dropout_list.append( float(dropout_size))
+                else:
+                    dropout_list.append(0)
+            fc_dense_size = input("Type the number of neurons in fully connected part: ")
+            fc_dropout = input("Type the dropout size (0.xx) in fully connected part: ")
+            fc_dense_size = int(fc_dense_size)
+            fc_dropout = int(fc_dropout)
         inChannel =  input("inChannel: ")
         batch_size = input("Batch Size: ") #128 stis diafaneies
         epochsenc = input("Epochs for fully connected part: ")
@@ -134,8 +161,6 @@ if __name__ == "__main__":
         batch_size = int(batch_size)
         epochs = int(epochs)
         epochsenc = int(epochsenc)
-        filters = input("Give me the number of filters: ")
-        filters = int(filters)
         input_img =  Input(shape=(x, y, inChannel), name='input')
 
         train_X = np.reshape(X, (len(X), 28, 28, 1))
@@ -155,8 +180,9 @@ if __name__ == "__main__":
         train_Y_one_hot = to_categorical(Y)
         test_Y_one_hot = to_categorical(Y1)
 
-        encode = encoder(input_img, filters)
-        fc_model = Model(input_img, fully_connected(encode, filters))
+        encode = encoder(input_img,CNN_convs, filters_size_list, kernel_size_list, dropout_list)
+        fc_model = Model(input_img, fully_connected(encode, fc_dense_size,fc_dropout))
+        print(len(fc_model.layers))
         trained = input("Type 'pre' to use pretrained model: ")
         if(trained == 'pre'):       #option to use pretrained model
             model_path = input("Give me the path to pretrained model: ")

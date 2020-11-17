@@ -157,7 +157,6 @@ if __name__ == "__main__":
                 plt.xlabel('epochs')
     #            plt.legend(['train_loss', 'val_loss'], loc='upper left')
                 plt.title('Batches: %d\ninChannell: %d\nEpochs: %d\nFilters: %d' %(history[1], history[2], history[3], history[4]), loc='left')
-
                 plt.legend()
                 plt.show()
         
