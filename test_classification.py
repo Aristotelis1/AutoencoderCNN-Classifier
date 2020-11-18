@@ -152,7 +152,7 @@ if __name__ == "__main__":
             fc_dense_size = input("Type the number of neurons in fully connected part: ")
             fc_dropout = input("Type the dropout size (0.xx) in fully connected part: ")
             fc_dense_size = int(fc_dense_size)
-            fc_dropout = int(fc_dropout)
+            fc_dropout = float(fc_dropout)
         inChannel =  input("inChannel: ")
         batch_size = input("Batch Size: ") #128 stis diafaneies
         epochsenc = input("Epochs for fully connected part: ")
