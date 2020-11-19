@@ -23,13 +23,11 @@ import math
 def encoder(input_img, convolutions, filter_size, kernel_size, dropout_size):
     #encoder
     #input 28 x 28 x 1
-
     conv1 = Conv2D(filter_size[0], (kernel_size[0],kernel_size[0]), activation='relu', padding='same')(input_img) # 28 x 28 x 32
     conv1 = BatchNormalization()(conv1)
     conv1 = Conv2D(filter_size[1], (kernel_size[1],kernel_size[1]), activation='relu', padding='same')(conv1)
     conv1 = BatchNormalization()(conv1)
-    pool1 = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
-    model = Dropout(dropout_size[1])(pool1)    #drop1
+    model = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
     for i in range(2, convolutions-1, 2):
         model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model) # 28 x 28 x 32
         model = BatchNormalization()(model)
@@ -37,8 +35,8 @@ def encoder(input_img, convolutions, filter_size, kernel_size, dropout_size):
         model = BatchNormalization()(model)
         if (i == 2):
             model = MaxPooling2D(pool_size=(2, 2))(model) #
-        if (i!=convolutions-1 and i!=convolutions-2):
-            model = Dropout(dropout_size[i+1])(model)    #drop1
+        model = Dropout(dropout_size[i+1])(model)    #drop1
+        print(dropout_size[i+1])
     if (convolutions%2 != 0):
         model = Conv2D(filter_size[convolutions-1], (kernel_size[convolutions-1],kernel_size[convolutions-1]), activation='relu', padding='same')(model)
         model = BatchNormalization()(model)
@@ -123,9 +121,9 @@ if __name__ == "__main__":
         CNN_convs = 8
         filters_size_list = [32,32,64,64,128,128,256,256]
         kernel_size_list = [3,3,3,3,3,3,3,3]
-        dropout_list = [0,0.3,0,0.3,0,0.3,0,0.3]
+        dropout_list = [0,0.4,0,0.4,0,0.4,0,0.4]
         fc_dense_size = 128
-        fc_dropout = 0.4
+        fc_dropout = 0.5
         create = input("Type 'create' if you want to create your own model: ")
         if(create == 'create'):
             filters_size_list.clear()
