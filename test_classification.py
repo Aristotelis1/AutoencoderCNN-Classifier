@@ -18,25 +18,25 @@ import platform
 from keras.models import load_model
 import math
 
+import random
 
 
 def encoder(input_img, convolutions, filter_size, kernel_size, dropout_size):
     #encoder
     #input 28 x 28 x 1
-    conv1 = Conv2D(filter_size[0], (kernel_size[0],kernel_size[0]), activation='relu', padding='same')(input_img) # 28 x 28 x 32
+    conv1 = Conv2D(filter_size[0], (kernel_size[0],kernel_size[0]), activation='relu', padding='same')(input_img)
     conv1 = BatchNormalization()(conv1)
     conv1 = Conv2D(filter_size[1], (kernel_size[1],kernel_size[1]), activation='relu', padding='same')(conv1)
     conv1 = BatchNormalization()(conv1)
-    model = MaxPooling2D(pool_size=(2, 2))(conv1) # 14 x 14 x 32
+    model = MaxPooling2D(pool_size=(2, 2))(conv1) 
     for i in range(2, convolutions-1, 2):
-        model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model) # 28 x 28 x 32
+        model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model)
         model = BatchNormalization()(model)
         model = Conv2D(filter_size[i+1], (kernel_size[i+1],kernel_size[i+1]), activation='relu', padding='same')(model)
         model = BatchNormalization()(model)
         if (i == 2):
-            model = MaxPooling2D(pool_size=(2, 2))(model) #
-        model = Dropout(dropout_size[i+1])(model)    #drop1
-        print(dropout_size[i+1])
+            model = MaxPooling2D(pool_size=(2, 2))(model) 
+        model = Dropout(dropout_size[i+1])(model) 
     if (convolutions%2 != 0):
         model = Conv2D(filter_size[convolutions-1], (kernel_size[convolutions-1],kernel_size[convolutions-1]), activation='relu', padding='same')(model)
         model = BatchNormalization()(model)
@@ -87,6 +87,7 @@ if __name__ == "__main__":
         images_path=args.test_set,
         labels_path=args.test_labels)
         
+    print('%s images with dimension: %s' % (X.shape[0],X.shape[1]))
     number_of_images_test = int(X1.shape[0])
     part = input("Type 'part' to use a part of your testset: ")
     if(part == "part"):
@@ -96,23 +97,14 @@ if __name__ == "__main__":
             print('You typed more images than expected. We will work with whole testset.')
         else:
             number_of_images_test = part
-    #number_of_images_test = 850
 
 
-    print('Dimensions: %s x %s' % (X.shape[0],X.shape[1]))
-    print('Digits:  0 1 2 3 4 5 6 7 8 9')
     print('labels: %s' % np.unique(Y))
 
 
 
-
-    # model=Model.create_model()
-    # model.evaluate(test_X, y1)
-    # model.load_weights(args.model)
-
-    model=load_model(args.model)        #mhpws to valoume mesa sth while kai check gia alla batches
+    model=load_model(args.model)       
     weights=model.get_weights()
-#    model.summary()
 
     history_list = []
     prediction_list = []
@@ -121,20 +113,22 @@ if __name__ == "__main__":
         CNN_convs = 8
         filters_size_list = [32,32,64,64,128,128,256,256]
         kernel_size_list = [3,3,3,3,3,3,3,3]
-        dropout_list = [0,0.4,0,0.4,0,0.4,0,0.4]
+        dropout_list = [0,0.7,0,0.7,0,0.7,0,0.7]
         fc_dense_size = 128
-        fc_dropout = 0.5
+        fc_dropout = 0.7
         create = input("Type 'create' if you want to create your own model: ")
         if(create == 'create'):
             filters_size_list.clear()
             kernel_size_list.clear()
             dropout_list.clear()
-            print("The CNN model has blocks of: 2 convolutions, each followed by 1 BatchNormalization and after that, 1 Dropout layer, except the last block which doesnt have Dropout after it.")
+            print('###################################################################################################################')
+            print("The CNN model has blocks of: 2 convolutions, each followed by 1 BatchNormalization and after that, \n1 Dropout layer, except the first block which doesnt have Dropout after it.")
             print("The first 2 blocks are also followed by 2 downsampling layers, so that the final image-layer has shape %s x %s" %(x/4 , y/4))
+            print('###################################################################################################################')
             CNN_convs = input ("Type the number of convolutions you want: ")
             CNN_convs = int(CNN_convs)
             while(CNN_convs < 3):
-                CNN_convs = input ("Type the number of convolutions you want: ")
+                CNN_convs = input ("Type the number of convolutions you want (at least 4 needed): ")
                 CNN_convs = int(CNN_convs)
 
             for i in range(0, CNN_convs):
@@ -196,6 +190,7 @@ if __name__ == "__main__":
         for x in fc_model.layers[0:enco_layers]:
             x.trainable=False
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
+        #fc_model.summary() #uncomment to see the summary of the model
         train_X,valid_X,train_label,valid_label = train_test_split(train_X,train_Y_one_hot,test_size=0.20,random_state=13)   #splitting persentage can change
         fc_train = fc_model.fit(train_X, train_label, batch_size=batch_size ,epochs=epochsenc,verbose=1,validation_data=(valid_X, valid_label))
 
@@ -234,14 +229,16 @@ if __name__ == "__main__":
                 plt.plot(epochs, val_accuracy, 'b', label='Validation accuracy')
                 plt.title('Filters: %s\nKernel size: %s\nDropout(encoder): %s\nNeurons FC: %d\nDropout(fc): %s' %(history[6], history[7], history[8], history[9], history[10]), loc='left')
                 plt.title('Convolutions: %d\nBatches: %d\ninChannell: %d\nEpochs for fc: %d\nEpochs for model: %d' %(history[5], history[1], history[2], history[3], history[4]), loc='right')
-                plt.xlabel('epochs')
+                plt.xlabel('Epochs (whole model)')
+                plt.ylabel('Accuracy')
                 plt.legend()
                 plt.figure()
                 plt.plot(epochs, loss, 'bo', label='Training loss')
                 plt.plot(epochs, val_loss, 'b', label='Validation loss')
                 plt.title('Filters: %s\nKernel size: %s\nDropout(encoder): %s\nNeurons FC: %d\nDropout(fc): %s' %(history[6], history[7], history[8], history[9], history[10]), loc='left')
                 plt.title('Convolutions: %d\nBatches: %d\ninChannell: %d\nEpochs for fc: %d\nEpochs for model: %d' %(history[5], history[1], history[2], history[3], history[4]), loc='right')
-                plt.xlabel('epochs')
+                plt.xlabel('Epochs (whole model')
+                plt.ylabel('Loss')
                 plt.legend()
                 plt.show()
 
@@ -275,10 +272,11 @@ if __name__ == "__main__":
                         incorrect = np.where(predict[0] !=Y1)[0]
                         print ("Found %d incorrect labels" % len(incorrect))
 
-                        for i, num in enumerate(test_X[:25]):
-                            plt.subplot(5,5,i+1)
-                            plt.imshow(test_X[i].reshape(28,28), cmap='gray', interpolation='none')
-                            plt.title("Predicted {}, Label {}".format(predict[0][i], Y1[i]))
+                        for i, num in enumerate(test_X[:16]):
+                            r = random.randint(0,number_of_images_test)
+                            plt.subplot(4,4,i+1)
+                            plt.imshow(test_X[r].reshape(28,28), cmap='gray', interpolation='none')
+                            plt.title("Predicted {}, Label {}".format(predict[0][r], Y1[r]))
                             plt.tight_layout()
                         plt.show()
                         flag = True
