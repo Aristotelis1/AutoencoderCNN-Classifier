@@ -20,37 +20,8 @@ import math
 
 import random
 
+from functions import encoder, fully_connected
 
-def encoder(input_img, convolutions, filter_size, kernel_size, dropout_size):
-    #encoder
-    #input 28 x 28 x 1
-    conv1 = Conv2D(filter_size[0], (kernel_size[0],kernel_size[0]), activation='relu', padding='same')(input_img)
-    conv1 = BatchNormalization()(conv1)
-    conv1 = Conv2D(filter_size[1], (kernel_size[1],kernel_size[1]), activation='relu', padding='same')(conv1)
-    conv1 = BatchNormalization()(conv1)
-    model = MaxPooling2D(pool_size=(2, 2))(conv1) 
-    for i in range(2, convolutions-1, 2):
-        model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-        model = Conv2D(filter_size[i+1], (kernel_size[i+1],kernel_size[i+1]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-        if (i == 2):
-            model = MaxPooling2D(pool_size=(2, 2))(model) 
-        model = Dropout(dropout_size[i+1])(model) 
-    if (convolutions%2 != 0):
-        model = Conv2D(filter_size[convolutions-1], (kernel_size[convolutions-1],kernel_size[convolutions-1]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-
-    return model
-
-
-def fully_connected(encode, dense_size,dropout_size):
-    temp = Flatten()(encode)
-    dence = Dense(dense_size, activation='relu')(temp)
-    dence = BatchNormalization()(dence)
-    dence = Dropout(dropout_size)(dence)
-    layers = Dense(10, activation='softmax')(dence)
-    return layers
 
 if __name__ == "__main__":
 
@@ -113,7 +84,7 @@ if __name__ == "__main__":
         CNN_convs = 8
         filters_size_list = [32,32,64,64,128,128,256,256]
         kernel_size_list = [3,3,3,3,3,3,3,3]
-        dropout_list = [0,0.7,0,0.7,0,0.7,0,0.7]
+        dropout_list = [0,0.70,0,0.70,0,0.70,0,0.70]
         fc_dense_size = 128
         fc_dropout = 0.7
         create = input("Type 'create' if you want to create your own model: ")
@@ -136,7 +107,7 @@ if __name__ == "__main__":
                 filters_size_list.append( int(filter_size) )
                 kernel_size = input ("Type the kernel size of Convolution(%d): " %(i+1))
                 kernel_size_list.append( int(kernel_size) )
-                if (i%2 == 1 and i!=CNN_convs-1):
+                if (i%2 == 1 and i!=1):
                     dropout_size = input ("Type the dropout size (0.xx) after Convolution(%d): " %(i+1))
                     dropout_list.append( float(dropout_size))
                 else:
@@ -237,7 +208,7 @@ if __name__ == "__main__":
                 plt.plot(epochs, val_loss, 'b', label='Validation loss')
                 plt.title('Filters: %s\nKernel size: %s\nDropout(encoder): %s\nNeurons FC: %d\nDropout(fc): %s' %(history[6], history[7], history[8], history[9], history[10]), loc='left')
                 plt.title('Convolutions: %d\nBatches: %d\ninChannell: %d\nEpochs for fc: %d\nEpochs for model: %d' %(history[5], history[1], history[2], history[3], history[4]), loc='right')
-                plt.xlabel('Epochs (whole model')
+                plt.xlabel('Epochs (whole model)')
                 plt.ylabel('Loss')
                 plt.legend()
                 plt.show()

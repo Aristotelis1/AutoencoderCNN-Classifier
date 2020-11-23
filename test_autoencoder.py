@@ -17,76 +17,7 @@ import platform
 import math
 import struct
 
-
-
-def encoder(input_img, convolutions, filter_size, kernel_size, dropout_size):
-    #encoder
-    #input 28 x 28 x 1
-    conv1 = Conv2D(filter_size[0], (kernel_size[0],kernel_size[0]), activation='relu', padding='same')(input_img) 
-    conv1 = BatchNormalization()(conv1)
-    conv1 = Conv2D(filter_size[1], (kernel_size[1],kernel_size[1]), activation='relu', padding='same')(conv1)
-    conv1 = BatchNormalization()(conv1)
-    model = MaxPooling2D(pool_size=(2, 2))(conv1)
-    for i in range(2, convolutions-1, 2):
-        model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model) 
-        model = BatchNormalization()(model)
-        model = Conv2D(filter_size[i+1], (kernel_size[i+1],kernel_size[i+1]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-        if (i == 2):
-            model = MaxPooling2D(pool_size=(2, 2))(model) 
-        model = Dropout(dropout_size[i+1])(model)    
-        print(dropout_size[i+1])
-    if (convolutions%2 != 0):
-        model = Conv2D(filter_size[convolutions-1], (kernel_size[convolutions-1],kernel_size[convolutions-1]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-
-    return model
-
-def decoder(model, convolutions, filter_size, kernel_size, dropout_size):
-    #decoder
-    if (convolutions%2 != 0):
-        model = Conv2D(filter_size[convolutions-1], (kernel_size[convolutions-1],kernel_size[convolutions-1]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-        model = Conv2D(filter_size[convolutions-2], (kernel_size[convolutions-2],kernel_size[convolutions-2]), activation='relu', padding='same')(model) 
-        model = BatchNormalization()(model)
-        model = Conv2D(filter_size[convolutions-3], (kernel_size[convolutions-3],kernel_size[convolutions-3]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-        if (convolutions==5):
-            model = UpSampling2D((2,2))(model)
-        model = Dropout(dropout_size[convolutions-3])(model)    
-
-        for i in range(convolutions-4 , -1, -2):
-            model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model) 
-            model = BatchNormalization()(model)
-            model = Conv2D(filter_size[i-1], (kernel_size[i-1],kernel_size[i-1]), activation='relu', padding='same')(model)
-            model = BatchNormalization()(model)
-            if (i == 1 or i == 3):
-                model = UpSampling2D((2,2))(model) 
-            if(i != 1):
-                model = Dropout(dropout_size[i-1])(model) 
-
-        model = Conv2D(1, (kernel_size[0],kernel_size[0]), activation='sigmoid', padding='same')(model)
-    else:
-        model = Conv2D(filter_size[convolutions-1], (kernel_size[convolutions-1],kernel_size[convolutions-1]), activation='relu', padding='same')(model) 
-        model = BatchNormalization()(model)
-        model = Conv2D(filter_size[convolutions-2], (kernel_size[convolutions-2],kernel_size[convolutions-2]), activation='relu', padding='same')(model)
-        model = BatchNormalization()(model)
-        if (convolutions==4):
-            model = UpSampling2D((2,2))(model)
-        model = Dropout(dropout_size[convolutions-1])(model)   
-        for i in range(convolutions-3 , -1, -2):
-            model = Conv2D(filter_size[i], (kernel_size[i],kernel_size[i]), activation='relu', padding='same')(model) 
-            model = BatchNormalization()(model)
-            model = Conv2D(filter_size[i-1], (kernel_size[i-1],kernel_size[i-1]), activation='relu', padding='same')(model)
-            model = BatchNormalization()(model)
-            if (i == 1 or i==3):
-                model = UpSampling2D((2,2))(model) 
-            if(i != 1):
-                model = Dropout(dropout_size[i])(model)  
-        
-        model = Conv2D(1, (kernel_size[0],kernel_size[0]), activation='sigmoid', padding='same')(model)
-
-    return model
+from functions import encoder, decoder
 
 
 if __name__ == "__main__":
@@ -125,7 +56,7 @@ if __name__ == "__main__":
         CNN_convs = 8
         filters_size_list = [32,32,64,64,128,128,256,256]
         kernel_size_list = [3,3,3,3,3,3,3,3]
-        dropout_list = [0,0.05,0,0.05,0,0.05,0,0.05]
+        dropout_list = [0,0.7,0,0.7,0,0.7,0,0.7]
         create = input("Type 'create' if you want to create your own model: ")
         if(create == 'create'):
             filters_size_list.clear()
