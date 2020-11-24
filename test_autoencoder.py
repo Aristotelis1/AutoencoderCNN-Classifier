@@ -57,7 +57,7 @@ if __name__ == "__main__":
         filters_size_list = [32,32,64,64,128,128,256,256]
         kernel_size_list = [3,3,3,3,3,3,3,3]
         dropout_list = [0,0.7,0,0.7,0,0.7,0,0.7]
-        create = input("Type 'create' if you want to create your own model: ")
+        create = input("Type 'create' if you want to create your own model: ") 
         if(create == 'create'):
             filters_size_list.clear()
             kernel_size_list.clear()
@@ -106,17 +106,16 @@ if __name__ == "__main__":
         autoencoder.compile(loss='mean_squared_error', optimizer = RMSprop()) #RMSprop() stis diafaneies
         #autoencoder.summary() #uncomment to see the summary of the model
 
-        #train_X = preprocess(train_X)
         train_X = train_X[:number_of_images] # uncomment if you want less images
         train_X, valid_X, train_ground, valid_ground = train_test_split(train_X,train_X,test_size=0.2, random_state=13)
-        #print('Dimensions: %s x %s' % (train_X.shape[0],train_X.shape[1]))
         filters = (','.join(str(x) for x in filters_size_list))
         kernel = (','.join(str(x) for x in kernel_size_list))
         drops = (','.join(str(x) for x in dropout_list))
 
 
         history = autoencoder.fit(train_X, train_ground, batch_size = batch_size,epochs = epochs,verbose=1, validation_data=(valid_X,valid_ground))
-        history_list.append((history,batch_size,inChannel,epochs, CNN_convs, filters, kernel, drops))
+        history_list.append((history,batch_size,inChannel,epochs, CNN_convs, filters, kernel, drops))   #each model history in list
+        #show plot datagrams
         pl = input("Type 'yes' to plot: ")
         if(pl == 'yes'):
 
@@ -127,12 +126,11 @@ if __name__ == "__main__":
                 plt.title('Convolutions: %d\nFilters: %s\nKernel size: %s\nDropout: %s' %(history[4], history[5], history[6], history[7]), loc='left')
                 plt.ylabel('Loss')
                 plt.xlabel('Epochs')
-    #            plt.legend(['train_loss', 'val_loss'], loc='upper left')
                 filters = 32
                 plt.title('Batches: %d\ninChannell: %d\nEpochs: %d' %(history[1], history[2], history[3]), loc='right')
                 plt.legend()
                 plt.show()
-        
+        #save the model
         next_move = input("Type 'save' to save: ")
         if(next_move == 'save'):
             path = input("Give me the path to save the previous autoencoder model: ")

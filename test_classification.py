@@ -51,14 +51,12 @@ if __name__ == "__main__":
             print('You typed more images than expected. We will work with whole dataset.')
         else:
             number_of_images_train = part
-    #number_of_images_train = 5000
     dimensions = int(X.shape[1])
 
     X1,Y1 = loadlocal_mnist(
         images_path=args.test_set,
         labels_path=args.test_labels)
         
-    print('%s images with dimension: %s' % (X.shape[0],X.shape[1]))
     number_of_images_test = int(X1.shape[0])
     part = input("Type 'part' to use a part of your testset: ")
     if(part == "part"):
@@ -69,7 +67,7 @@ if __name__ == "__main__":
         else:
             number_of_images_test = part
 
-
+    print('%s images with dimension: %s' % (X.shape[0],X.shape[1]))
     print('labels: %s' % np.unique(Y))
 
 
@@ -117,7 +115,7 @@ if __name__ == "__main__":
             fc_dense_size = int(fc_dense_size)
             fc_dropout = float(fc_dropout)
         inChannel =  input("inChannel: ")
-        batch_size = input("Batch Size: ") #128 stis diafaneies
+        batch_size = input("Batch Size: ")
         epochsenc = input("Epochs for fully connected part: ")
         epochs = input("Epochs for whole model: ")
         inChannel = int(inChannel)
@@ -145,19 +143,19 @@ if __name__ == "__main__":
 
         encode = encoder(input_img,CNN_convs, filters_size_list, kernel_size_list, dropout_list)
         fc_model = Model(input_img, fully_connected(encode, fc_dense_size,fc_dropout))
-        enco_layers = len(fc_model.layers)-5
+        enco_layers = len(fc_model.layers)-5    #get number of layers on encoder
         trained = input("Type 'pre' to use pretrained model: ")
-        if(trained == 'pre'):       #option to use pretrained model
+        if(trained == 'pre'):       #option to use pretrained whole model
             model_path = input("Give me the path to pretrained model: ")
             model = load_model(model_path)
             weights = model.get_weights()
             for m1, m2 in zip(fc_model.layers[:], model.layers[:]):
                 m1.set_weights(m2.get_weights())
-        else:
+        else:   #default option to use pretrained autoencoder model
             for m1, m2 in zip(fc_model.layers[:enco_layers], model.layers[0:enco_layers]):
                 m1.set_weights(m2.get_weights())
 
-        #train only encode (all layers after 20 layers of encode since its pretrained)
+        #train only fully connected layer
         for x in fc_model.layers[0:enco_layers]:
             x.trainable=False
         fc_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.RMSprop(),metrics=['accuracy'])
@@ -182,11 +180,11 @@ if __name__ == "__main__":
 
 
         prediction_list.append((predicted_classes,test_eval))
-
+        #show plot datagrams
         pl = input("Type 'yes' to plot: ")
         if(pl == 'yes'):
             for history,predict in zip(history_list,prediction_list):
-                print('Batches: %d\ninChannell: %d\nEpochs (): %d\nFilters: %d' %(history[1], history[2], history[3], history[4]))
+                print('Batches: %d\nEpochs (fully connected): %d\nEpochs (whole model): %d\nConvolutions: %d\nFully connected neurons: %d' %(history[1], history[3], history[4], history[5], history[9]))
                 target_names = ["Number {}".format(i) for i in range(10)]
                 print('Test loss:', predict[1][0])
                 print('Test accuracy:', predict[1][1])
@@ -214,10 +212,8 @@ if __name__ == "__main__":
                 plt.show()
 
         next_move = input("Type 'print' to print: ")
+        #show some images with their prediction
         if(next_move == 'print'):
-            # test_eval = fc_model.evaluate(test_X, test_Y_one_hot, verbose=0)
-            # print('Test loss:', test_eval[0])
-            # print('Test accuracy:', test_eval[1])
             flag = False
             while(flag == False):
                 ubatch_size = input("Batch Size: ") #128 stis diafaneies
@@ -235,7 +231,6 @@ if __name__ == "__main__":
                 uepochsenc = int(uepochsenc)
                 ubatch_size = int(ubatch_size)
                 uepochs = int(uepochs)
-                #flag = False
                 for history,predict in zip(history_list,prediction_list):
                     if(history[1] == ubatch_size and history[3] == uepochsenc and history[4] == uepochs and history[5] == uconvs and history[9] == ufc_neurons):
                         correct = np.where(predict[0]==Y1)[0]
@@ -256,10 +251,7 @@ if __name__ == "__main__":
                     answer = input("You want to try again? Type 'yes': ")
                     if(answer != 'yes'):
                         break
-
-            # target_names = ["Number {}".format(i) for i in range(10)]
-            # print(classification_report(Y1, predicted_classes, target_names=target_names))
-
+        #save whole model
         next_move = input("Type 'save' to save: ")
         if(next_move == 'save'):
             path = input("Give me the path to save the previous fully connected model: ")
